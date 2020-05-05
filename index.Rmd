@@ -1,0 +1,878 @@
+---
+title: "Pilot Data 2020"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+    source_code: embed
+    vertical_layout: scroll
+    theme: cerulean
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidyverse)
+library(rio)
+library(here)
+library(colorblindr)
+library(gghighlight)
+library(forcats)
+library(ggrepel)
+library(gt)
+library(knitr)
+library(kableExtra)
+library(reactable)
+library(plotly)
+
+opts_chunk$set(echo = FALSE,
+               fig.width = 5,
+               fig.height = 6)
+
+theme_set(theme_minimal(base_size = 8))
+
+outcome <- import(here("data", "client_data_outcome.sav"),
+               setclass = "tbl_df") %>% 
+  characterize() %>% 
+  janitor::clean_names() 
+
+rm_prge <- import(here("data", "repeated_measures_prge.sav"),
+               setclass = "tbl_df") %>% 
+  characterize() %>% 
+  janitor::clean_names() 
+
+head(outcome)
+head(rm_prge)
+```
+
+# PRGE Outcome Measures
+
+Column {.tabset data-width=650}
+-----------------------------------------------------------------------
+
+```{r outcome measures data organization, include=FALSE}
+head(outcome)
+
+brief <- outcome %>% 
+  filter(client == "PRGE") %>% 
+  select(1, c(16:31))
+
+brief_prge <- brief %>% 
+  select(client, brief_eri_pre_self, brief_eri_post_self, brief_eri_pre_inf, brief_eri_post_inf)
+
+brief_tidy <- brief_prge %>% 
+  rename("Self Pre ERI" = brief_eri_pre_self,
+         "Self Post ERI" = brief_eri_post_self,
+         "Parent Pre ERI" = brief_eri_pre_inf,
+         "Parent Post ERI" = brief_eri_post_inf) %>% 
+  pivot_longer(
+    cols = c(2:5),
+    names_to = "measure",
+    values_to = "score"
+  )
+
+class <- outcome %>% 
+  filter(client == "PRGE") %>% 
+  select(client, class_total_pre, class_total_post) %>% 
+  rename("Pre Score" = class_total_pre,
+         "Post Score" = class_total_post)
+
+class_tidy <- class %>% 
+   pivot_longer(
+    cols = c(2:3),
+    names_to = "measure",
+    values_to = "score"
+  )
+
+symptoms <- outcome %>% 
+  filter(client == "PRGE") %>% 
+  select(1, c(6:13)) %>% 
+  rename("Feeling Slow Pre" = pcss_pre_feeling_slow,
+         "Feeling Slow Post" = pcss_post_feeling_slow,
+         "Feeling Foggy Pre" = pcss_pre_feeling_foggy,
+         "Feeling Foggy Post" = pcss_post_feeling_foggy,
+         "Difficulty Concentrating Pre" = pcss_pre_difficulty_concentrating,
+         "Difficulty Concentrating Post" = pcss_post_difficulty_concentrating, 
+         "Difficulty Remembering Pre" = pcss_pre_difficulty_remembering,
+         "Difficulty Remembering Post" = pcss_post_difficulty_remembering) %>% 
+  pivot_longer(
+    cols = c(2:9),
+    names_to = "measure",
+    values_to = "score"
+  )
+
+hit <- outcome %>% 
+  filter(client == "PRGE") %>% 
+  select(client, hit_pre, hit_post) %>% 
+  rename("Pre Score" = hit_pre,
+         "Post Score" = hit_post) %>% 
+   pivot_longer(
+    cols = c(2:3),
+    names_to = "measure",
+    values_to = "score"
+  )
+```
+
+```{r outcome plots, include=FALSE}
+#geom_rect(aes(xmin = -Inf, xmax = Inf, ymin = 65, ymax = 100),
+            #fill = "lightgreen") + #insert before geom_col 
+
+prge_brief <- c("Self Pre ERI",
+                "Self Post ERI",
+                "Parent Pre ERI",
+                "Parent Post ERI")
+                
+
+
+class_positions <- c("Pre Score", "Post Score")
+
+pcss_positions <- c("Difficulty Remembering Post",
+                    "Difficulty Remembering Pre",
+                    "Difficulty Concentrating Post",
+                     "Difficulty Concentrating Pre",
+                     "Feeling Foggy Post",
+                    "Feeling Foggy Pre",
+                    "Feeling Slow Post",
+                    "Feeling Slow Pre")
+
+hit_positions <- c("Pre Score", "Post Score")
+
+p1 <- ggplot(brief_tidy, aes(measure, score)) +
+  geom_hline(yintercept = 65, 
+             linetype = "dashed",
+             size = 1) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = prge_brief) +
+  scale_y_continuous(limits = c(0, 100),
+                     breaks = c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -3,
+            color = "white") +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10)) +
+  labs(x = "",
+       y = "T-score",
+       title = "BRIEF Scores",
+       subtitle = "Emotion Regulation Index",
+       caption = "T-scores Above 65 are Clinically Significant") 
+
+p1
+
+p2 <- ggplot(class_tidy, aes(measure, score)) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = class_positions) +
+  scale_y_continuous(limits = c(0, 60),
+                     breaks = c(10, 20, 30, 40, 50, 60)) +
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -3,
+            color = "white") +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "",
+       y = "Score",
+       title = "CLASS Scores") 
+ p2
+
+
+p3 <- ggplot(symptoms, aes(measure, score)) +
+  geom_hline(yintercept = 30, 
+             linetype = "dashed",
+             size = 1) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = pcss_positions) +
+  scale_y_continuous(limits = c(0, 6),
+                     breaks = c(0, 1, 2, 3, 4, 5, 6)) + 
+  coord_flip() +
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -0.5,
+            color = "white") +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10)) +
+  labs(x = "",
+       y = "Score",
+       title = "PCSS Results",
+       subtitle = "Cognitive Symptoms",
+       caption = "0 = No Symptoms\n 3 = Moderate Symptoms\n 6 = Severe Symptoms") 
+
+p3
+
+p3a <- ggplot(hit, aes(measure, score)) +
+  geom_hline(yintercept = 50, 
+             linetype = "dashed",
+             size = 1) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = hit_positions) +
+  scale_y_continuous(limits = c(0, 60),
+                     breaks = c(10, 20, 30, 40, 50, 60)) + 
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -3,
+            color = "white") +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10)) +
+  labs(x = "",
+       y = "Score",
+       title = "HIT Results",
+       caption = "Scores of 50 or Greater Suggest Headaches Impact Daily Functioning") 
+
+p3a
+```
+
+### BRIEF
+```{r prge brief, include=TRUE}
+ggplotly(p1)
+
+```
+
+### CLASS
+```{r prge class, include=TRUE}
+ggplotly(p2)
+```
+
+
+### PCSS
+
+```{r prge pcss, include=TRUE}
+ggplotly(p3)
+```
+
+
+### HIT
+
+```{r prge hit, include=TRUE}
+ggplotly(p3a)
+```
+
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Client Demographics
+
+```{r, include=FALSE}
+head(outcome)
+
+demo_prge <- outcome %>% 
+  filter(client == "PRGE") %>% 
+  select(2:5)
+  
+head(demo_prge)
+
+prge_table <- demo_prge %>% 
+  gt() %>% 
+  cols_label(sex = "Sex",
+             age = "Age",
+             prev_mtbi = "Prior Concussions",
+             hx_depression = "History of Depression or Anxiety") %>% 
+  cols_align(align = "center", columns = vars(sex, age, prev_mtbi, hx_depression)) %>% 
+  tab_header(title = "Client Demographics")
+  
+prge_table
+```
+
+```{r prge table, include=TRUE}
+prge_table
+```
+
+# PRGE Repeated Measures 
+
+Column {.tabset data-width=650}
+-----------------------------------------------------------------------
+
+### Status Tracking
+
+```{r repeated measures data cleaning, include=FALSE}
+
+head(rm_prge)
+
+track <- rm_prge %>% 
+  select(session, status)
+
+p4 <- ggplot(track, aes(session, status)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 6),
+                     breaks = c(1, 2, 3, 4, 5, 6)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Number of Times Required to Reread Content",
+       title = "Status Tracking Goal") 
+
+p4
+
+
+effort_data <- rm_prge %>% 
+  select(session, effort)
+
+p5 <- ggplot(effort_data, aes(session, effort)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 4),
+                     breaks = c(1, 2, 3, 4)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Perceived Effort During Reading",
+       title = "Perceived Effort While Reading",
+       caption = "1 = No Effort at All\n 2 = Not Much Effort\n 3 = Some Effort\n 4 = A Lot of Effort") 
+
+p5
+
+helpfulness <- rm_prge %>% 
+  select(session, help)
+
+p6 <- ggplot(helpfulness, aes(session, help)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 5),
+                     breaks = c(1, 2, 3, 4, 5)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Perceived Helpfulness",
+       title = "Perceived Helpfulness of Reading Strategies",
+       caption = "1 = Not Helpful at All\n 2 = Not Helpful\n 3 = Somewhat Helpful\n 4 = Helpful\n 5 = Very Helpful") 
+
+p6
+```
+
+
+```{r status, include=TRUE}
+ggplotly(p4) 
+```
+
+### Perceived Effort
+
+```{r effort, include=TRUE, fig.align="left"}
+ggplotly(p5)
+```
+
+### Perceived Strategy Helpfulness 
+
+```{r helpfulness, include=TRUE, fig.align="left"}
+ggplotly(p6)
+```
+
+
+# FALO Outcome Measures
+
+Column {.tabset data-width=650}
+-----------------------------------------------------------------------
+
+```{r falo measures data organization, include=FALSE}
+head(outcome)
+
+falo <- outcome %>% 
+  filter(client == "FALO")
+
+brief_falo <- falo %>% 
+  select(client, brief_cri_pre_self, brief_cri_post_self, brief_cri_pre_inf, brief_cri_post_inf) %>% 
+  rename("Self Pre CRI" = brief_cri_pre_self,
+         "Self Post CRI" = brief_cri_post_self,
+         "Parent Pre CRI" = brief_cri_pre_inf,
+         "Parent Post CRI" = brief_cri_post_inf) %>% 
+  pivot_longer(
+    cols = c(2:5),
+    names_to = "measure",
+    values_to = "score"
+  )
+
+class_falo <- falo %>% 
+  select(client, class_total_pre, class_total_post) %>% 
+  rename("Pre Score" = class_total_pre,
+         "Post Score" = class_total_post) %>% 
+   pivot_longer(
+    cols = c(2:3),
+    names_to = "measure",
+    values_to = "score"
+  )
+
+pcss_falo <- falo %>% 
+  select(1, c(6:13)) %>% 
+  rename("Feeling Slow Pre" = pcss_pre_feeling_slow,
+         "Feeling Slow Post" = pcss_post_feeling_slow,
+         "Feeling Foggy Pre" = pcss_pre_feeling_foggy,
+         "Feeling Foggy Post" = pcss_post_feeling_foggy,
+         "Difficulty Concentrating Pre" = pcss_pre_difficulty_concentrating,
+         "Difficulty Concentrating Post" = pcss_post_difficulty_concentrating, 
+         "Difficulty Remembering Pre" = pcss_pre_difficulty_remembering,
+         "Difficulty Remembering Post" = pcss_post_difficulty_remembering) %>% 
+  pivot_longer(
+    cols = c(2:9),
+    names_to = "measure",
+    values_to = "score"
+  )
+
+hit_falo <- falo %>% 
+  select(client, hit_pre, hit_post) %>% 
+  rename("Pre Score" = hit_pre,
+         "Post Score" = hit_post) %>% 
+   pivot_longer(
+    cols = c(2:3),
+    names_to = "measure",
+    values_to = "score"
+  )
+```
+
+```{r falo plots, include=FALSE}
+
+falo_brief_graph <- c("Self Pre CRI",
+                "Self Post CRI",
+                "Parent Pre CRI",
+                "Parent Post CRI")
+                
+
+p7 <- ggplot(brief_falo, aes(measure, score)) +
+  geom_hline(yintercept = 65, 
+             linetype = "dashed",
+             size = 1) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = falo_brief_graph) +
+  scale_y_continuous(limits = c(0, 100),
+                     breaks = c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -3,
+            color = "white") +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10)) +
+  labs(x = "",
+       y = "T-score",
+       title = "BRIEF Scores",
+       subtitle = "Cognitive Regulation Index",
+       caption = "T-scores Above 65 are Clinically Significant") 
+
+p7
+
+p8 <- ggplot(class_falo, aes(measure, score)) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = class_positions) +
+  scale_y_continuous(limits = c(0, 60),
+                     breaks = c(10, 20, 30, 40, 50, 60)) +
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -3,
+            color = "white") +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "",
+       y = "Score",
+       title = "CLASS Scores") 
+ p8
+
+
+p9 <- ggplot(pcss_falo, aes(measure, score)) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = pcss_positions) +
+  scale_y_continuous(limits = c(0, 6),
+                     breaks = c(0, 1, 2, 3, 4, 5, 6)) + 
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -1,
+            color = "white") +
+  coord_flip() +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10)) +
+  labs(x = "",
+       y = "Score",
+       title = "PCSS Results",
+       subtitle = "Cognitive Symptoms",
+       caption = "0 = No Symptoms\n 3 = Moderate Symptoms\n 6 = Severe Symptoms") 
+
+p9
+
+falo_pcss_table <- pcss_falo %>% 
+  select(-client) %>% 
+  gt() %>% 
+  cols_label(measure = "PCSS Question",
+             score = "Response") %>% 
+  cols_align(align = "left", columns = vars(measure)) %>% 
+  cols_align(align = "center", columns = vars(score)) %>% 
+  tab_header(title = "PCSS Results",
+             subtitle = "Cognitive Symptoms")
+
+falo_pcss_table
+
+falo_reactable <- pcss_falo %>% 
+  select(-client) %>% 
+  rename("PCSS Question" = measure,
+         "Response" = score) %>% 
+  reactable()
+
+falo_reactable
+
+
+
+p10 <- ggplot(hit_falo, aes(measure, score)) +
+  geom_hline(yintercept = 50, 
+             linetype = "dashed",
+             size = 1) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = hit_positions) +
+  scale_y_continuous(limits = c(0, 60),
+                     breaks = c(10, 20, 30, 40, 50, 60)) + 
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -3,
+            color = "white") +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10)) +
+  labs(x = "",
+       y = "Score",
+       title = "HIT Results",
+       caption = "Scores of 50 or Greater Suggest Headaches Significantly Impact Daily Functioning") 
+
+p10
+```
+
+### BRIEF 
+
+```{r falo brief, include=TRUE, fig.width=6}
+ggplotly(p7)
+```
+
+### CLASS
+
+```{r falo class, include=TRUE, fig.width=6}
+ggplotly(p8)
+```
+
+### PCSS
+
+```{r falo pcss, include=TRUE}
+falo_pcss_table
+```
+
+### HIT
+
+```{r falo hit, include=TRUE}
+ggplotly(p10)
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Client Demographics
+
+```{r, include=FALSE}
+head(outcome)
+
+demo_falo <- outcome %>% 
+  filter(client == "FALO") %>% 
+  select(2:5)
+  
+head(demo_falo)
+
+falo_table <- demo_falo %>% 
+  gt() %>% 
+  cols_label(sex = "Sex",
+             age = "Age",
+             prev_mtbi = "Prior Concussions",
+             hx_depression = "History of Depression or Anxiety") %>% 
+  cols_align(align = "center", columns = vars(sex, age, prev_mtbi, hx_depression)) %>% 
+  tab_header(title = "Client Demographics")
+  
+falo_table
+```
+
+```{r falo table, include=TRUE}
+falo_table
+```
+
+# DRKAT Outcome Measures
+
+Column {.tabset data-width=650}
+-----------------------------------------------------------------------
+
+```{r drkat measures data organization, include=FALSE}
+head(outcome)
+
+drkat <- outcome %>% 
+  filter(client == "DRKAT")
+
+brief_drkat <- drkat %>% 
+  select(1, 16, 17, 20, 21, 32, 33) %>% 
+  rename("Pre Global" = brief_global_pre_self,
+         "Post Global" = brief_global_post_self,
+         "Pre BRI" = brief_bri_pre_self,
+         "Post BRI" = brief_bri_post_self,
+         "Pre MI" = brief_mi_pre_self,
+         "Post MI" = brief_mi_post_self) %>% 
+  pivot_longer(
+    cols = c(2:7),
+    names_to = "measure",
+    values_to = "score"
+  )
+
+drkat_brief_graph <- c("Pre Global",
+                "Post Global",
+                "Pre BRI",
+                "Post BRI",
+                "Pre MI",
+                "Post MI")
+
+class_drkat <- drkat %>% 
+  select(client, class_total_pre, class_total_post) %>% 
+  rename("Pre Score" = class_total_pre,
+         "Post Score" = class_total_post) %>% 
+   pivot_longer(
+    cols = c(2:3),
+    names_to = "measure",
+    values_to = "score"
+  )
+
+
+pcss_drkat <- drkat %>% 
+  select(1, c(6:13)) %>% 
+  rename("Feeling Slow Pre" = pcss_pre_feeling_slow,
+         "Feeling Slow Post" = pcss_post_feeling_slow,
+         "Feeling Foggy Pre" = pcss_pre_feeling_foggy,
+         "Feeling Foggy Post" = pcss_post_feeling_foggy,
+         "Difficulty Concentrating Pre" = pcss_pre_difficulty_concentrating,
+         "Difficulty Concentrating Post" = pcss_post_difficulty_concentrating, 
+         "Difficulty Remembering Pre" = pcss_pre_difficulty_remembering,
+         "Difficulty Remembering Post" = pcss_post_difficulty_remembering) %>% 
+  pivot_longer(
+    cols = c(2:9),
+    names_to = "measure",
+    values_to = "score"
+  )
+
+hit_drkat <- drkat %>% 
+  select(client, hit_pre, hit_post) %>% 
+  rename("Pre Score" = hit_pre,
+         "Post Score" = hit_post) %>% 
+   pivot_longer(
+    cols = c(2:3),
+    names_to = "measure",
+    values_to = "score"
+  )
+```
+
+```{r drkat plots, include=FALSE}
+
+drkat_brief_plot <- ggplot(brief_drkat, aes(measure, score)) +
+  geom_hline(yintercept = 65, 
+             linetype = "dashed",
+             size = 1) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = drkat_brief_graph) +
+  scale_y_continuous(limits = c(0, 100),
+                     breaks = c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -3,
+            color = "white") +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10)) +
+  labs(x = "",
+       y = "T-score",
+       title = "BRIEF Scores",
+       subtitle = "Self-Report Global Index, Behavioral Regulation Index, & Metacognitive Index",
+       caption = "T-scores Above 65 are Clinically Significant") 
+
+drkat_brief_plot
+
+drkat_class_plot <- ggplot(class_drkat, aes(measure, score)) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = class_positions) +
+  scale_y_continuous(limits = c(0, 60),
+                     breaks = c(10, 20, 30, 40, 50, 60)) +
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -3,
+            color = "white") +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "",
+       y = "Score",
+       title = "CLASS Scores") 
+
+drkat_class_plot
+
+
+drkat_pcss_plot <- ggplot(pcss_drkat, aes(measure, score)) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = pcss_positions) +
+  scale_y_continuous(limits = c(0, 6),
+                     breaks = c(0, 1, 2, 3, 4, 5, 6)) + 
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -1,
+            color = "white") +
+  coord_flip() +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10)) +
+  labs(x = "",
+       y = "Score",
+       title = "PCSS Results",
+       subtitle = "Cognitive Symptoms",
+       caption = "0 = No Symptoms\n 3 = Moderate Symptoms\n 6 = Severe Symptoms") 
+
+drkat_pcss_plot
+
+drkat_hit_plot <- ggplot(hit_drkat, aes(measure, score)) +
+  geom_hline(yintercept = 50, 
+             linetype = "dashed",
+             size = 1) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = hit_positions) +
+  scale_y_continuous(limits = c(0, 60),
+                     breaks = c(10, 20, 30, 40, 50, 60)) + 
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -3,
+            color = "white") +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10)) +
+  labs(x = "",
+       y = "Score",
+       title = "HIT Results",
+       caption = "Scores of 50 or Greater Suggest Headaches Significantly Impact Daily Functioning") 
+
+drkat_hit_plot
+```
+
+### BRIEF 
+```{r drkat brief, include=TRUE, fig.width=6}
+ggplotly(drkat_brief_plot)
+```
+
+### CLASS
+
+```{r drkat class, include=TRUE, fig.width=6}
+ggplotly(drkat_class_plot)
+```
+
+### PCSS
+
+```{r drkat pcss, include=TRUE}
+ggplotly(drkat_pcss_plot)
+```
+
+### HIT
+
+```{r drkat hit, include=TRUE}
+ggplotly(drkat_hit_plot)
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Client Demographics
+
+```{r, include=FALSE}
+head(outcome)
+
+demo_drkat <- outcome %>% 
+  filter(client == "DRKAT") %>% 
+  select(2:5)
+  
+head(demo_drkat)
+
+drkat_table <- demo_drkat %>% 
+  gt() %>% 
+  cols_label(sex = "Sex",
+             age = "Age",
+             prev_mtbi = "Prior Concussions",
+             hx_depression = "History of Depression or Anxiety") %>% 
+  cols_align(align = "center", columns = vars(sex, age, prev_mtbi, hx_depression)) %>% 
+  tab_header(title = "Client Demographics")
+  
+drkat_table
+```
+
+```{r drkat table, include=TRUE}
+drkat_table
+```
