@@ -120,9 +120,7 @@ prge_brief <- c("Self Pre ERI",
                 "Self Post ERI",
                 "Parent Pre ERI",
                 "Parent Post ERI")
-                
-
-
+              
 class_positions <- c("Pre Score", "Post Score")
 
 pcss_positions <- c("Difficulty Remembering Post",
@@ -247,27 +245,27 @@ p3a
 
 ### BRIEF
 ```{r prge brief, include=TRUE}
-ggplotly(p1)
+p1
 
 ```
 
 ### CLASS
 ```{r prge class, include=TRUE}
-ggplotly(p2)
+p2
 ```
 
 
 ### PCSS
 
 ```{r prge pcss, include=TRUE}
-ggplotly(p3)
+p3
 ```
 
 
 ### HIT
 
 ```{r prge hit, include=TRUE}
-ggplotly(p3a)
+p3a
 ```
 
 
@@ -342,8 +340,8 @@ p5 <- ggplot(effort_data, aes(session, effort)) +
   geom_point(size = 2) +
   scale_x_continuous(limits = c(0, 10),
                      breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
-  scale_y_continuous(limits = c(0, 4),
-                     breaks = c(1, 2, 3, 4)) +
+  scale_y_continuous(limits = c(0, 5),
+                     breaks = c(1, 2, 3, 4, 5)) +
   theme_classic() +
   theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
         axis.text = element_text(size = 10),
@@ -352,7 +350,7 @@ p5 <- ggplot(effort_data, aes(session, effort)) +
   labs(x = "Session",
        y = "Perceived Effort During Reading",
        title = "Perceived Effort While Reading",
-       caption = "1 = No Effort at All\n 2 = Not Much Effort\n 3 = Some Effort\n 4 = A Lot of Effort") 
+       caption = "1 = No Effort\n 2 = A little Effort\n 3 = Somewhat Effortful\n 4 = Quite Effortful\n 5 = Extremely Effortful") 
 
 p5
 
@@ -381,19 +379,19 @@ p6
 
 
 ```{r status, include=TRUE}
-ggplotly(p4) 
+p4
 ```
 
 ### Perceived Effort
 
 ```{r effort, include=TRUE, fig.align="left"}
-ggplotly(p5)
+p5
 ```
 
 ### Perceived Strategy Helpfulness 
 
 ```{r helpfulness, include=TRUE, fig.align="left"}
-ggplotly(p6)
+p6
 ```
 
 
@@ -595,13 +593,13 @@ p10
 ### BRIEF 
 
 ```{r falo brief, include=TRUE, fig.width=6}
-ggplotly(p7)
+p7
 ```
 
 ### CLASS
 
 ```{r falo class, include=TRUE, fig.width=6}
-ggplotly(p8)
+p8
 ```
 
 ### PCSS
@@ -613,7 +611,7 @@ falo_pcss_table
 ### HIT
 
 ```{r falo hit, include=TRUE}
-ggplotly(p10)
+p10
 ```
 
 Column {data-width=350}
@@ -826,25 +824,25 @@ drkat_hit_plot
 
 ### BRIEF 
 ```{r drkat brief, include=TRUE, fig.width=6}
-ggplotly(drkat_brief_plot)
+drkat_brief_plot
 ```
 
 ### CLASS
 
 ```{r drkat class, include=TRUE, fig.width=6}
-ggplotly(drkat_class_plot)
+drkat_class_plot
 ```
 
 ### PCSS
 
 ```{r drkat pcss, include=TRUE}
-ggplotly(drkat_pcss_plot)
+drkat_pcss_plot
 ```
 
 ### HIT
 
 ```{r drkat hit, include=TRUE}
-ggplotly(drkat_hit_plot)
+drkat_hit_plot
 ```
 
 Column {data-width=350}
