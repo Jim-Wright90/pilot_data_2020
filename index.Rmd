@@ -42,6 +42,12 @@ rm_prge <- import(here("data", "repeated_measures_prge.sav"),
 
 head(outcome)
 head(rm_prge)
+
+rm_drkat <- import(here("data", "drkat_rm.csv"),
+                   setclass = "tbl_df") %>% 
+  janitor::clean_names()
+
+head(rm_drkat)
 ```
 
 # PRGE Outcome Measures
@@ -874,3 +880,44 @@ drkat_table
 ```{r drkat table, include=TRUE}
 drkat_table
 ```
+
+
+# DRKAT Repeated Measures 
+
+Column {.tabset data-width=650}
+-----------------------------------------------------------------------
+
+### Status Tracking
+
+```{r repeated measures drkat data cleaning, include=FALSE}
+
+drkat_track <- rm_drkat %>% 
+  select(session, status)
+
+drkat_status_plot <- ggplot(drkat_track, aes(session, status)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Number of House Chores Completed per Week",
+       title = "Status Tracking Goal") 
+
+drkat_status_plot
+
+
+```
+
+
+```{r drkat status, include=TRUE}
+drkat_status_plot
+```
+
+
