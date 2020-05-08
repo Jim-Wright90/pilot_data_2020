@@ -3,8 +3,6 @@ title: "Pilot Data 2020"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
-    social: menu
-    source_code: embed
     vertical_layout: scroll
     theme: cerulean
 ---
@@ -48,6 +46,12 @@ rm_drkat <- import(here("data", "drkat_rm.csv"),
   janitor::clean_names()
 
 head(rm_drkat)
+
+brief_data <- import(here("data", "brief_pilot_data.xlsx"),
+                     setclass = "tbl_df") %>% 
+  janitor::clean_names()
+
+head(brief_data)
 ```
 
 # PRGE Outcome Measures
@@ -412,17 +416,114 @@ head(outcome)
 falo <- outcome %>% 
   filter(client == "FALO")
 
-brief_falo <- falo %>% 
-  select(client, brief_cri_pre_self, brief_cri_post_self, brief_cri_pre_inf, brief_cri_post_inf) %>% 
-  rename("Self Pre CRI" = brief_cri_pre_self,
-         "Self Post CRI" = brief_cri_post_self,
-         "Parent Pre CRI" = brief_cri_pre_inf,
-         "Parent Post CRI" = brief_cri_post_inf) %>% 
+falo_brief_self <- brief_data %>% 
+  filter(client == "FALO") %>% 
+  select(client,
+         working_memory_pre_self, 
+         working_memory_post_self,
+         plan_organize_pre_sr,
+         plan_organize_post_sr,
+         task_monitor_pre_sr,
+         task_monitor_post_sr) %>% 
+  rename("WM Pre" = working_memory_pre_self,
+         "WM Post" = working_memory_post_self,
+         "PO Pre" = plan_organize_pre_sr,
+         "PO Post" = plan_organize_post_sr,
+         "TM Pre" = task_monitor_pre_sr,
+         "TM Post" = task_monitor_post_sr) %>% 
   pivot_longer(
-    cols = c(2:5),
+    cols = c(2:7),
     names_to = "measure",
     values_to = "score"
-  )
+  ) 
+
+
+falo_sr_brief <- c("WM Pre",
+         "WM Post",
+         "PO Pre",
+         "PO Post",
+         "TM Pre",
+         "TM Post")
+  
+falo_sr_plot <- ggplot(falo_brief_self, aes(measure, score)) +
+  geom_hline(yintercept = 65, 
+             linetype = "dashed",
+             size = 1) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = falo_sr_brief) +
+  scale_y_continuous(limits = c(0, 100),
+                     breaks = c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -3,
+            color = "white") +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10)) +
+  labs(x = "",
+       y = "T-score",
+       title = "BRIEF Scores",
+       subtitle = "Working Memory, Plan/Organize, and Task Monitoring Scales",
+       caption = "T-scores Above 65 are Clinically Significant") 
+
+falo_sr_plot
+
+
+falo_brief_parent <- brief_data %>% 
+  filter(client == "FALO") %>% 
+  select(client,
+         working_memory_pre_parent, 
+         working_memory_post_parent,
+         plan_organize_pre_parent,
+         plan_organize_post_parent,
+         task_monitor_pre_parent,
+         task_monitor_post_parent) %>% 
+  rename("WM Pre" = working_memory_pre_parent,
+         "WM Post" = working_memory_post_parent,
+         "PO Pre" = plan_organize_pre_parent,
+         "PO Post" = plan_organize_post_parent,
+         "TM Pre" = task_monitor_pre_parent,
+         "TM Post" = task_monitor_post_parent) %>% 
+  pivot_longer(
+    cols = c(2:7),
+    names_to = "measure",
+    values_to = "score"
+  ) 
+
+falo_parent_plot <- ggplot(falo_brief_parent, aes(measure, score)) +
+  geom_hline(yintercept = 65, 
+             linetype = "dashed",
+             size = 1) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = falo_sr_brief) +
+  scale_y_continuous(limits = c(0, 100),
+                     breaks = c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -3,
+            color = "white") +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10)) +
+  labs(x = "",
+       y = "T-score",
+       title = "BRIEF Scores",
+       subtitle = "Working Memory, Plan/Organize, and Task Monitoring Scales",
+       caption = "T-scores Above 65 are Clinically Significant") 
+
+falo_parent_plot
 
 class_falo <- falo %>% 
   select(client, class_total_pre, class_total_post) %>% 
@@ -462,41 +563,6 @@ hit_falo <- falo %>%
 ```
 
 ```{r falo plots, include=FALSE}
-
-falo_brief_graph <- c("Self Pre CRI",
-                "Self Post CRI",
-                "Parent Pre CRI",
-                "Parent Post CRI")
-                
-
-p7 <- ggplot(brief_falo, aes(measure, score)) +
-  geom_hline(yintercept = 65, 
-             linetype = "dashed",
-             size = 1) +
-  geom_col(fill = "blue", 
-           alpha = 0.7) +
-  scale_x_discrete(limits = falo_brief_graph) +
-  scale_y_continuous(limits = c(0, 100),
-                     breaks = c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
-  geom_text(aes(measure, score, label = score),
-            nudge_y = -3,
-            color = "white") +
-  theme(panel.grid.major.y = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.grid.major.x = element_line(color = "gray80")) +
-  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
-        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
-        axis.text = element_text(size = 10),
-        axis.title=element_text(size=10),
-        strip.text = element_text(size = 10),
-        plot.caption = element_text(size = 10)) +
-  labs(x = "",
-       y = "T-score",
-       title = "BRIEF Scores",
-       subtitle = "Cognitive Regulation Index",
-       caption = "T-scores Above 65 are Clinically Significant") 
-
-p7
 
 p8 <- ggplot(class_falo, aes(measure, score)) +
   geom_col(fill = "blue", 
@@ -596,10 +662,16 @@ p10 <- ggplot(hit_falo, aes(measure, score)) +
 p10
 ```
 
-### BRIEF 
+### BRIEF Self Report
 
 ```{r falo brief, include=TRUE, fig.width=6}
-p7
+falo_sr_plot
+```
+
+### BRIEF Parent Report
+
+```{r falo brief parent, include=TRUE, fig.width=6}
+falo_parent_plot
 ```
 
 ### CLASS
@@ -658,6 +730,18 @@ Column {.tabset data-width=650}
 ```{r drkat measures data organization, include=FALSE}
 head(outcome)
 
+
+drkat_brief_2 <- brief_data %>% 
+  filter(client == "DRKAT") %>% 
+  select(client, 22, 23) %>% 
+  rename("Working Memory Pre" = working_memory_pre_self,
+         "Working Memory Post" = working_memory_post_self) %>% 
+  pivot_longer(
+    cols = c(2:3),
+    names_to = "measure",
+    values_to = "score"
+  )
+
 drkat <- outcome %>% 
   filter(client == "DRKAT")
 
@@ -675,12 +759,7 @@ brief_drkat <- drkat %>%
     values_to = "score"
   )
 
-drkat_brief_graph <- c("Pre Global",
-                "Post Global",
-                "Pre BRI",
-                "Post BRI",
-                "Pre MI",
-                "Post MI")
+drkat_brief_graph <- c("Working Memory Pre", "Working Memory Post")
 
 class_drkat <- drkat %>% 
   select(client, class_total_pre, class_total_post) %>% 
@@ -722,7 +801,7 @@ hit_drkat <- drkat %>%
 
 ```{r drkat plots, include=FALSE}
 
-drkat_brief_plot <- ggplot(brief_drkat, aes(measure, score)) +
+drkat_brief_plot <- ggplot(drkat_brief_2, aes(measure, score)) +
   geom_hline(yintercept = 65, 
              linetype = "dashed",
              size = 1) +
@@ -746,7 +825,7 @@ drkat_brief_plot <- ggplot(brief_drkat, aes(measure, score)) +
   labs(x = "",
        y = "T-score",
        title = "BRIEF Scores",
-       subtitle = "Self-Report Global Index, Behavioral Regulation Index, & Metacognitive Index",
+       subtitle = "Working Memory Scale",
        caption = "T-scores Above 65 are Clinically Significant") 
 
 drkat_brief_plot
