@@ -80,6 +80,24 @@ brief_tidy <- brief_prge %>%
     values_to = "score"
   )
 
+prge_brief_parent <- brief_data %>% 
+  filter(client == "PRGE") %>% 
+  select(client, 8, 9, 16, 17) %>% 
+  rename("SM Pre" = self_monitor_pre_parent,
+         "SM Post" = self_monitor_post_parent,
+         "EC Pre" = emotional_control_pre_parent,
+         "EC Post" = emotional_control_post_parent) %>% 
+  pivot_longer(
+    cols = c(2:5),
+    names_to = "measure",
+    values_to = "score"
+  )
+
+prge_parent <- c("SM Pre",
+         "SM Post",
+         "EC Pre",
+         "EC Post")
+
 class <- outcome %>% 
   filter(client == "PRGE") %>% 
   select(client, class_total_pre, class_total_post) %>% 
@@ -92,6 +110,7 @@ class_tidy <- class %>%
     names_to = "measure",
     values_to = "score"
   )
+
 
 symptoms <- outcome %>% 
   filter(client == "PRGE") %>% 
@@ -171,6 +190,35 @@ p1 <- ggplot(brief_tidy, aes(measure, score)) +
        subtitle = "Emotion Regulation Index",
        caption = "T-scores Above 65 are Clinically Significant") 
 
+prge_parent_graph <- ggplot(prge_brief_parent, aes(measure, score)) +
+  geom_hline(yintercept = 65, 
+             linetype = "dashed",
+             size = 1) +
+  geom_col(fill = "blue", 
+           alpha = 0.7) +
+  scale_x_discrete(limits = prge_parent) +
+  scale_y_continuous(limits = c(0, 100),
+                     breaks = c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
+  geom_text(aes(measure, score, label = score),
+            nudge_y = -3,
+            color = "white") +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10)) +
+  labs(x = "",
+       y = "T-score",
+       title = "BRIEF Scores",
+       subtitle = "Parent Responses to the Self-Monitor and Emotional Control Scales",
+       caption = "T-scores Above 65 are Clinically Significant") 
+
+prge_parent_graph 
+  
 p1
 
 p2 <- ggplot(class_tidy, aes(measure, score)) +
@@ -253,10 +301,15 @@ p3a <- ggplot(hit, aes(measure, score)) +
 p3a
 ```
 
-### BRIEF
+### BRIEF Client-Parent Responses
 ```{r prge brief, include=TRUE}
 p1
 
+```
+
+### BRIEF Parent Responses
+```{r prge parent brief, include=TRUE}
+prge_parent_graph
 ```
 
 ### CLASS
