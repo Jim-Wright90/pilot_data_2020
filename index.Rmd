@@ -3,8 +3,10 @@ title: "Pilot Data 2020"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
+    social: menu
+    source_code: embed
     vertical_layout: scroll
-    theme: cerulean
+    theme: spacelab
 ---
 
 ```{r setup, include=FALSE}
@@ -52,9 +54,13 @@ brief_data <- import(here("data", "brief_pilot_data.xlsx"),
   janitor::clean_names()
 
 head(brief_data)
+
+falo_rm <- import(here("data", "falo_rm.xlsx"),
+                  setclass = "tbl_df") %>% 
+  janitor::clean_names()
 ```
 
-# PRGE Outcome Measures
+# PRGE Outcome
 
 Column {.tabset data-width=650}
 -----------------------------------------------------------------------
@@ -362,7 +368,7 @@ prge_table
 prge_table
 ```
 
-# PRGE Repeated Measures 
+# PRGE Repeated 
 
 Column {.tabset data-width=650}
 -----------------------------------------------------------------------
@@ -458,7 +464,7 @@ p6
 ```
 
 
-# FALO Outcome Measures
+# FALO Outcome
 
 Column {.tabset data-width=650}
 -----------------------------------------------------------------------
@@ -775,7 +781,238 @@ falo_table
 falo_table
 ```
 
-# DRKAT Outcome Measures
+# FALO Repeated 
+
+Column {.tabset data-width=650}
+-----------------------------------------------------------------------
+
+### Status Tracking 1
+
+```{r falo repeated measures data cleaning, include=FALSE}
+
+head(falo_rm)
+
+falo_status_1 <- falo_rm %>% 
+  select(session, status_1)
+
+falo_status_1_plot <- ggplot(falo_status_1, aes(session, status_1)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 7),
+                     breaks = c(0, 1, 2, 3, 4, 5, 6, 7)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Number of Nights Per Week Gone to Bed Prior to 3:00 AM",
+       title = "Status Tracking Goal 1") 
+
+falo_status_1_plot
+
+phone_falo <- falo_rm %>% 
+  select(session, num_nights)
+
+phone_falo_graph <- ggplot(phone_falo, aes(session, num_nights)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 7),
+                     breaks = c(0, 1, 2, 3, 4, 5, 6, 7)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Number of Nights Per Week Implementing No-Phone Strategy",
+       title = "No Phone Strategy",
+       subtitle = "To be implemented 1:00-7:00 AM") 
+
+phone_falo_graph
+
+falo_effect <- falo_rm %>% 
+  select(session, effect)
+
+falo_effect_graph <- ggplot(falo_effect, aes(session, effect)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 5),
+                     breaks = c(1, 2, 3, 4, 5)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Perceived Effectiveness",
+       title = "Perceived Effectiveness of No Phone Strategy",
+       caption = "1 = Not Effective at All\n 2 = Not Effective\n 3 = Somewhat Effective\n 4 = Effective\n 5 = Very Effective") 
+
+falo_effect_graph
+
+falo_status_2 <- falo_rm %>% 
+  select(session, status_2)
+
+falo_status_2_plot <- ggplot(falo_status_2, aes(session, status_2)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 5),
+                     breaks = c(0, 1, 2, 3, 4, 5)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Number of Missing Assignments per Week",
+       title = "Status Tracking Goal 2") 
+
+falo_status_2_plot
+
+head(falo_rm)
+
+falo_freq_1 <- falo_rm %>% 
+  select(session, planner)
+
+falo_freq_1_plot <- ggplot(falo_freq_1, aes(session, planner)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 10),
+                     breaks = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Number of Weekly Assignments Entered into Calendar",
+       title = "Frequency of Planner Use") 
+
+falo_freq_1_plot
+
+falo_help_1 <- falo_rm %>% 
+  select(session, help_plan)
+
+falo_planner_plot <- ggplot(falo_help_1, aes(session, help_plan)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 5),
+                     breaks = c(1, 2, 3, 4, 5)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Perceived Helpfulness",
+       title = "Perceived Helpfulness of Tracking Assignments in Planner",
+       caption = "1 = Not Helpful at All\n 2 = Not Helpful\n 3 = Somewhat Helpful\n 4 = Helpful\n 5 = Very Helpful") 
+
+falo_planner_plot
+
+
+falo_freq_2 <- falo_rm %>% 
+  select(session, num_days)
+
+falo_freq_2_plot <- ggplot(falo_freq_2, aes(session, num_days)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 7),
+                     breaks = c(0, 1, 2, 3, 4, 5, 6, 7)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Number of Days Per Week Using Time Block Strategy",
+       title = "Frequency of Time Block Strategy Use") 
+
+falo_freq_2_plot
+
+falo_help_2 <- falo_rm %>% 
+  select(session, help_block)
+
+falo_block_plot <- ggplot(falo_help_2, aes(session, help_block)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 5),
+                     breaks = c(1, 2, 3, 4, 5)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Perceived Helpfulness",
+       title = "Perceived Helpfulness of Time Block Strategy",
+       caption = "1 = Not Helpful at All\n 2 = Not Helpful\n 3 = Somewhat Helpful\n 4 = Helpful\n 5 = Very Helpful") 
+
+falo_block_plot
+```
+
+
+```{r falo status 1, include=TRUE}
+falo_status_1_plot
+```
+
+### Phone Strategy Use
+
+```{r falo phone graph, include=TRUE, fig.align="left"}
+phone_falo_graph
+```
+
+### Perceived Effectiveness 
+
+```{r phone strategy helpfulness, include=TRUE, fig.align="left"}
+falo_effect_graph
+```
+
+### Status Tracking 2
+
+```{r falo status tracking 2, include=TRUE}
+falo_status_2_plot
+```
+
+### Planner Use
+```{r falo planner use, include=TRUE}
+falo_freq_1_plot
+```
+
+### Planner Helpfulness
+```{r falo planner helpfulness, include=TRUE}
+falo_planner_plot
+```
+
+### Time Block Use
+```{r falo time block use, include=TRUE}
+falo_freq_2_plot
+```
+
+### Planner Helpfulness
+```{r falo time block helpfulness, include=TRUE}
+falo_block_plot
+```
+
+
+# DRKAT Outcome 
 
 Column {.tabset data-width=650}
 -----------------------------------------------------------------------
@@ -1014,7 +1251,7 @@ drkat_table
 ```
 
 
-# DRKAT Repeated Measures 
+# DRKAT Repeated
 
 Column {.tabset data-width=650}
 -----------------------------------------------------------------------
