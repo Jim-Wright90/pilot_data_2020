@@ -1,0 +1,85 @@
+---
+title: "class plots"
+author: "Jim Wright"
+date: "5/11/2020"
+output: 
+  html_document: 
+    toc: true
+    toc_float: true
+    theme: "spacelab"
+    highlight: "tango"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(rio)
+library(here)
+library(tidyverse)
+library(gt)
+
+prge_class <- import(here("data", "prge_class.xlsx"),
+                  setclass = "tbl_df") 
+
+head(prge_class)
+
+prge_stress <- import(here("data", "prge_class_stress.xlsx"),
+                  setclass = "tbl_df") 
+head(prge_stress)
+```
+
+### PRGE Class Graphs 
+```{r prge}
+ggplot(prge_class, aes(`Question`, `Pre-Test`)) +
+  geom_point() +
+  coord_flip()
+
+prge_diff <- prge_class %>% 
+  pivot_longer(
+    cols = c(`Pre-Test`, `Post-Test`),
+    names_to = "Assessment",
+    values_to = "Response"
+  )
+
+class_1 <- c("Easily bothered by lights/screens or noise",
+             "Tiring easily during homework",
+             "Tiring easily during the school day",
+             "Headaches interfering with homework",
+             "Headaches interfering with classwork",
+             "Easily distracted during homework",
+             "Easily distracted during classwork",
+             "Trouble reading",
+             "Trouble remembering what was studied",
+             "Difficulty studying for tests or quizzes",
+             "Homework taking longer",
+             "In class, work taking longer",
+             "Difficulty understanding new material",
+             "Difficulty taking notes")
+
+class_1_resp <- c("A lot worse",
+                  "Somewhat worse",
+                  "A little worse",
+                  "Not worse/not a problem")
+
+prge_diff$Assessment <- factor(prge_diff$Assessment, levels = c("Pre-Test", "Post-Test"))
+
+ggplot(prge_diff, aes(`Question`, `Response`)) +
+  geom_line(aes(group = `Question`), color = "gray40") +
+  geom_point(aes(color = `Assessment`)) +
+  coord_flip() +
+  scale_x_discrete(limits = class_1) +
+  scale_y_discrete(limits = class_1_resp) +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10)) +
+  labs(x = "",
+       y = "",
+    title = "Comparison of CLASS Responses Questions",
+       subtitle = "Questions 1-14")
+```

@@ -808,7 +808,7 @@ falo_status_1_plot <- ggplot(falo_status_1, aes(session, status_1)) +
         axis.title=element_text(size=10),
         strip.text = element_text(size = 10)) +
   labs(x = "Session",
-       y = "Number of Nights Per Week Gone to Bed Prior to 3:00 AM",
+       y = "Number of Nights Per Week Gone to Bed Prior to 12:00 AM",
        title = "Status Tracking Goal 1") 
 
 falo_status_1_plot
