@@ -43,7 +43,7 @@ rm_prge <- import(here("data", "repeated_measures_prge.sav"),
 head(outcome)
 head(rm_prge)
 
-rm_drkat <- import(here("data", "drkat_rm.csv"),
+rm_drkat <- import(here("data", "drkat_rm.xlsx"),
                    setclass = "tbl_df") %>% 
   janitor::clean_names()
 
@@ -1259,6 +1259,7 @@ Column {.tabset data-width=650}
 ### Status Tracking
 
 ```{r repeated measures drkat data cleaning, include=FALSE}
+head(rm_drkat)
 
 drkat_track <- rm_drkat %>% 
   select(session, status)
@@ -1281,7 +1282,85 @@ drkat_status_plot <- ggplot(drkat_track, aes(session, status)) +
 
 drkat_status_plot
 
+drkat_effort <- rm_drkat %>% 
+  select(session, effort)
 
+drkat_effort_plot <- ggplot(drkat_effort, aes(session, effort)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Perceived Effort",
+       title = "Perceived Effort While Completing House Chores",
+       caption = "1 = No Effort\n 2 = A little Effort\n 3 = Somewhat Effortful\n 4 = Quite Effortful\n 5 = Extremely Effortful")  
+
+drkat_motivation <- rm_drkat %>% 
+  select(session, motivation)
+
+drkat_motivation_plot <- ggplot(drkat_motivation, aes(session, motivation)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Perceived Motivation",
+       title = "Perceived Motivation to Complete House Chores",
+       caption = "1 = No Motivation\n 2 = A little Motivation\n 3 = Somewhat Motivated\n 4 = Quite Motivated\n 5 = Extremely Motivated")  
+
+drkat_freq <- rm_drkat %>% 
+  select(session, frequency)
+
+drkat_freq_plot <- ggplot(drkat_freq, aes(session, frequency)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 10),
+                     breaks = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Number of Tasks Entered into Calendar per Week",
+       title = "Frequency of Calendar Use") 
+
+
+drkat_help <- rm_drkat %>% 
+  select(session, helpfulness)
+
+drkat_help_plot <- ggplot(drkat_help, aes(session, helpfulness)) +
+  geom_line() +
+  geom_point(size = 2) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 5),
+                     breaks = c(1, 2, 3, 4, 5)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Perceived Helpfulness",
+       title = "Perceived Helpfulness of Calendar",
+       caption = "1 = Not Helpful at All\n 2 = Not Helpful\n 3 = Somewhat Helpful\n 4 = Helpful\n 5 = Very Helpful") 
 ```
 
 
@@ -1289,4 +1368,23 @@ drkat_status_plot
 drkat_status_plot
 ```
 
+### Perceived Effort
+```{r drkat perceived effort, include=TRUE}
+drkat_effort_plot
+```
+
+### Perceived Motivation 
+```{r drkat perceived motivation, include=TRUE}
+drkat_motivation_plot
+```
+
+### Planner Use
+```{r drkat perceived frequency of strategy use, include=TRUE}
+drkat_freq_plot
+```
+
+### Perceived Helpfulness
+```{r drkat perceived helpfulness of strategy use, include=TRUE}
+drkat_help_plot
+```
 
