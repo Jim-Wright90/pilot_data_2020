@@ -43,6 +43,15 @@ rm_prge <- import(here("data", "repeated_measures_prge.sav"),
 head(outcome)
 head(rm_prge)
 
+prge_class_worse <- import(here("data", "prge_class.xlsx"),
+                      setclass = "tbl_df")
+
+prge_class_stress <- import(here("data", "prge_class_stress.xlsx"),
+                       setclass = "tbl_df")
+
+prge_pcss <- import(here("data", "pcss_prge.xlsx"),
+               setclass = "tbl_df")
+
 rm_drkat <- import(here("data", "drkat_rm.xlsx"),
                    setclass = "tbl_df") %>% 
   janitor::clean_names()
@@ -305,6 +314,127 @@ p3a <- ggplot(hit, aes(measure, score)) +
        caption = "Scores of 50 or Greater Suggest Headaches Impact Daily Functioning") 
 
 p3a
+
+head(prge_class_worse)
+head(prge_class_stress)
+
+prge_class_worse_tidy <- prge_class_worse %>% 
+  pivot_longer(
+    cols = c(`Pre-Test`, `Post-Test`),
+    names_to = "Assessment",
+    values_to = "Response"
+  )
+
+class_1 <- c("Easily bothered by lights/screens or noise",
+             "Tiring easily during homework",
+             "Tiring easily during the school day",
+             "Headaches interfering with homework",
+             "Headaches interfering with classwork",
+             "Easily distracted during homework",
+             "Easily distracted during classwork",
+             "Trouble reading",
+             "Trouble remembering what was studied",
+             "Difficulty studying for tests or quizzes",
+             "Homework taking longer",
+             "In class, work taking longer",
+             "Difficulty understanding new material",
+             "Difficulty taking notes")
+
+class_1_resp <- c("A lot worse",
+                  "Somewhat worse",
+                  "A little worse",
+                  "Not worse")
+
+prge_class_worse_tidy$Assessment <- factor(prge_class_worse_tidy$Assessment, levels = c("Pre-Test", "Post-Test"))
+
+prge_class_worse_plot <- ggplot(prge_class_worse_tidy, aes(`Question`, `Response`)) +
+  geom_line(aes(group = `Question`), color = "gray40") +
+  geom_point(aes(color = `Assessment`)) +
+  coord_flip() +
+  scale_x_discrete(limits = class_1) +
+  scale_y_discrete(limits = class_1_resp) +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10),
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 8)) +
+  labs(x = "",
+       y = "",
+    title = "CLASS Responses",
+       subtitle = "Questions 1-14")
+
+prge_class_worse_plot
+
+head(prge_class_stress)
+
+prge_class_stress_tidy <- prge_class_stress %>% 
+  pivot_longer(
+    cols = c(`Pre-Test`, `Post-Test`),
+    names_to = "Assessment",
+    values_to = "Response"
+  )
+
+class_2 <- c("Stressed out about your grades dropping",
+             "More stressed out/overwhelmed with the schoolwork piling up",
+             "Not having enough support at home from parents/siblings",
+             "Not having enough support from teachers",
+             "Not being allowed to play sports/recreation",
+             "Missing time with friends and/or social activities")
+
+class_2_resp <- c("Very stressful",
+                  "Moderately stressful",
+                  "A little stressful",
+                  "Not stressful")
+
+prge_class_stress_tidy$Assessment <- factor(prge_class_stress_tidy$Assessment, levels = c("Pre-Test", "Post-Test"))
+
+prge_class_stress_plot <- ggplot(prge_class_stress_tidy, aes(`Question`, `Response`)) +
+  geom_line(aes(group = `Question`), color = "gray40") +
+  geom_point(aes(color = `Assessment`)) +
+  coord_flip() +
+  scale_x_discrete(limits = class_2) +
+  scale_y_discrete(limits = class_2_resp) +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text.x = element_text(size = 8, angle = 90),
+        axis.text.y = element_text(size = 8),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10),
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 8)) +
+  labs(x = "",
+       y = "",
+    title = "CLASS Responses",
+       subtitle = "Questions 15-20")
+
+prge_class_stress_plot
+
+head(prge_pcss)
+prge_pcss_table <- prge_pcss %>% 
+  reactable(
+    columns = list(
+      `Pre Test` = colDef(name = "Pre-Test"),
+      `Post Test` = colDef(name = "Post-Test")),
+    pagination = FALSE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE,
+    searchable = TRUE,
+    height = 600,
+    width = 500)
 ```
 
 ### BRIEF Client-Parent Responses
@@ -318,16 +448,21 @@ p1
 prge_parent_graph
 ```
 
-### CLASS
-```{r prge class, include=TRUE}
-p2
+### CLASS 1
+```{r prge class 1, include=TRUE, fig.width=8}
+prge_class_worse_plot
+```
+
+### CLASS 2
+```{r prge class 2, include=TRUE, fig.width=8}
+prge_class_stress_plot
 ```
 
 
 ### PCSS
 
 ```{r prge pcss, include=TRUE}
-p3
+prge_pcss_table
 ```
 
 
@@ -866,7 +1001,7 @@ falo_status_2_plot <- ggplot(falo_status_2, aes(session, status_2)) +
   scale_x_continuous(limits = c(0, 10),
                      breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
   scale_y_continuous(limits = c(0, 5),
-                     breaks = c(0, 1, 2, 3, 4, 5)) +
+                     breaks = c(0 , 1, 2, 3, 4, 5)) +
   theme_classic() +
   theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
         axis.text = element_text(size = 10),
