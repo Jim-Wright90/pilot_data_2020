@@ -272,8 +272,9 @@ prge_class_worse_plot <- ggplot(prge_class_worse_tidy, aes(`Question`, `Response
         axis.title=element_text(size=10),
         strip.text = element_text(size = 10),
         plot.caption = element_text(size = 10),
-        legend.title = element_text(size = 10),
-        legend.text = element_text(size = 8)) +
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom") +
   labs(x = "",
        y = "",
     title = "CLASS Responses",
@@ -315,13 +316,14 @@ prge_class_stress_plot <- ggplot(prge_class_stress_tidy, aes(`Question`, `Respon
         panel.grid.major.x = element_line(color = "gray80")) +
   theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
         plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
-        axis.text.x = element_text(size = 8, angle = 90),
-        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10),
         axis.title=element_text(size=10),
         strip.text = element_text(size = 10),
         plot.caption = element_text(size = 10),
-        legend.title = element_text(size = 8),
-        legend.text = element_text(size = 8)) +
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom") +
   labs(x = "",
        y = "",
     title = "CLASS Responses",
@@ -388,13 +390,14 @@ prge_brief_self_plot <- ggplot(prge_brief_self_tidy, aes(`Scale/Index`, `Respons
         panel.grid.major.x = element_line(color = "gray80")) +
   theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
         plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
-        axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
         axis.title=element_text(size=10),
         strip.text = element_text(size = 10),
         plot.caption = element_text(size = 10),
-        legend.title = element_text(size = 8),
-        legend.text = element_text(size = 8)) +
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom") +
   labs(x = "",
        y = "",
     title = "BRIEF-2 Self-Report",
@@ -425,13 +428,14 @@ prge_brief_parent_plot <- ggplot(prge_brief_parent_tidy, aes(`Scale/Index`, `Res
         panel.grid.major.x = element_line(color = "gray80")) +
   theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
         plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
-        axis.text.x = element_text(size = 8),
-        axis.text.y = element_text(size = 8),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
         axis.title=element_text(size=10),
         strip.text = element_text(size = 10),
         plot.caption = element_text(size = 10),
-        legend.title = element_text(size = 8),
-        legend.text = element_text(size = 8)) +
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom") +
   labs(x = "",
        y = "",
     title = "BRIEF-2 Parent-Report",
