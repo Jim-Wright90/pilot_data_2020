@@ -58,6 +58,33 @@ prge_class_stress <- import(here("data", "prge_class_stress.xlsx"),
 prge_pcss <- import(here("data", "pcss_prge.xlsx"),
                setclass = "tbl_df")
 
+falo_brief_self <- import(here("data", "falo_brief_self.xlsx"),
+                      setclass = "tbl_df")
+
+falo_brief_parent <- import(here("data", "falo_brief_parent.xlsx"),
+                      setclass = "tbl_df")
+
+falo_class_worse <- import(here("data", "falo_class.xlsx"),
+                      setclass = "tbl_df")
+
+falo_class_stress <- import(here("data", "falo_class_stress.xlsx"),
+                       setclass = "tbl_df")
+
+falo_pcss <- import(here("data", "pcss_falo.xlsx"),
+               setclass = "tbl_df")
+
+drkat_brief_self <- import(here("data", "drkat_brief_self.xlsx"),
+                      setclass = "tbl_df")
+
+drkat_class_worse <- import(here("data", "drkat_class.xlsx"),
+                      setclass = "tbl_df")
+
+drkat_class_stress <- import(here("data", "drkat_class_stress.xlsx"),
+                       setclass = "tbl_df")
+
+drkat_pcss <- import(here("data", "pcss_drkat.xlsx"),
+               setclass = "tbl_df")
+
 rm_drkat <- import(here("data", "drkat_rm.xlsx"),
                    setclass = "tbl_df") %>% 
   janitor::clean_names()
@@ -613,145 +640,134 @@ Column {.tabset data-width=650}
 ```{r falo measures data organization, include=FALSE}
 head(outcome)
 
-falo <- outcome %>% 
+falo_hit <- outcome %>% 
   filter(client == "FALO")
 
-falo_brief_self <- brief_data %>% 
-  filter(client == "FALO") %>% 
-  select(client,
-         working_memory_pre_self, 
-         working_memory_post_self,
-         plan_organize_pre_sr,
-         plan_organize_post_sr,
-         task_monitor_pre_sr,
-         task_monitor_post_sr) %>% 
-  rename("WM Pre" = working_memory_pre_self,
-         "WM Post" = working_memory_post_self,
-         "PO Pre" = plan_organize_pre_sr,
-         "PO Post" = plan_organize_post_sr,
-         "TM Pre" = task_monitor_pre_sr,
-         "TM Post" = task_monitor_post_sr) %>% 
+
+head(falo_class_worse)
+head(falo_class_stress)
+
+falo_class_worse_tidy <- falo_class_worse %>% 
   pivot_longer(
-    cols = c(2:7),
-    names_to = "measure",
-    values_to = "score"
-  ) 
+    cols = c(`Pre-Test`, `Post-Test`),
+    names_to = "Assessment",
+    values_to = "Response"
+  )
 
+class_1 <- c("Easily bothered by lights/screens or noise",
+             "Tiring easily during homework",
+             "Tiring easily during the school day",
+             "Headaches interfering with homework",
+             "Headaches interfering with classwork",
+             "Easily distracted during homework",
+             "Easily distracted during classwork",
+             "Trouble reading",
+             "Trouble remembering what was studied",
+             "Difficulty studying for tests or quizzes",
+             "Homework taking longer",
+             "In class, work taking longer",
+             "Difficulty understanding new material",
+             "Difficulty taking notes")
 
-falo_sr_brief <- c("WM Pre",
-         "WM Post",
-         "PO Pre",
-         "PO Post",
-         "TM Pre",
-         "TM Post")
-  
-falo_sr_plot <- ggplot(falo_brief_self, aes(measure, score)) +
-  geom_hline(yintercept = 65, 
-             linetype = "dashed",
-             size = 1) +
-  geom_col(fill = "blue", 
-           alpha = 0.7) +
-  scale_x_discrete(limits = falo_sr_brief) +
-  scale_y_continuous(limits = c(0, 100),
-                     breaks = c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
-  geom_text(aes(measure, score, label = score),
-            nudge_y = -3,
-            color = "white") +
+class_1_resp <- c("A lot worse",
+                  "Somewhat worse",
+                  "A little worse",
+                  "Not worse")
+
+falo_class_worse_tidy$Assessment <- factor(falo_class_worse_tidy$Assessment, levels = c("Pre-Test", "Post-Test"))
+
+falo_class_worse_plot <- ggplot(falo_class_worse_tidy, aes(`Question`, `Response`)) +
+  geom_line(aes(group = `Question`), color = "gray40") +
+  geom_point(aes(color = `Assessment`)) +
+  coord_flip() +
+  scale_x_discrete(limits = class_1) +
+  scale_y_discrete(limits = class_1_resp) +
   theme(panel.grid.major.y = element_blank(),
         panel.grid.minor.x = element_blank(),
         panel.grid.major.x = element_line(color = "gray80")) +
   theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
         plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
-        axis.text = element_text(size = 10),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10),
         axis.title=element_text(size=10),
         strip.text = element_text(size = 10),
-        plot.caption = element_text(size = 10)) +
+        plot.caption = element_text(size = 10),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom") +
   labs(x = "",
-       y = "T-score",
-       title = "BRIEF Scores",
-       subtitle = "Working Memory, Plan/Organize, and Task Monitoring Scales",
-       caption = "T-scores Above 65 are Clinically Significant") 
+       y = "",
+    title = "CLASS Responses",
+       subtitle = "Questions 1-14")
 
-falo_sr_plot
+falo_class_worse_plot
 
+head(falo_class_stress)
 
-falo_brief_parent <- brief_data %>% 
-  filter(client == "FALO") %>% 
-  select(client,
-         working_memory_pre_parent, 
-         working_memory_post_parent,
-         plan_organize_pre_parent,
-         plan_organize_post_parent,
-         task_monitor_pre_parent,
-         task_monitor_post_parent) %>% 
-  rename("WM Pre" = working_memory_pre_parent,
-         "WM Post" = working_memory_post_parent,
-         "PO Pre" = plan_organize_pre_parent,
-         "PO Post" = plan_organize_post_parent,
-         "TM Pre" = task_monitor_pre_parent,
-         "TM Post" = task_monitor_post_parent) %>% 
+falo_class_stress_tidy <- falo_class_stress %>% 
   pivot_longer(
-    cols = c(2:7),
-    names_to = "measure",
-    values_to = "score"
-  ) 
+    cols = c(`Pre-Test`, `Post-Test`),
+    names_to = "Assessment",
+    values_to = "Response"
+  )
 
-falo_parent_plot <- ggplot(falo_brief_parent, aes(measure, score)) +
-  geom_hline(yintercept = 65, 
-             linetype = "dashed",
-             size = 1) +
-  geom_col(fill = "blue", 
-           alpha = 0.7) +
-  scale_x_discrete(limits = falo_sr_brief) +
-  scale_y_continuous(limits = c(0, 100),
-                     breaks = c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
-  geom_text(aes(measure, score, label = score),
-            nudge_y = -3,
-            color = "white") +
+class_2 <- c("Stressed out about your grades dropping",
+             "More stressed out/overwhelmed with the schoolwork piling up",
+             "Not having enough support at home from parents/siblings",
+             "Not having enough support from teachers",
+             "Not being allowed to play sports/recreation",
+             "Missing time with friends and/or social activities")
+
+class_2_resp <- c("Very stressful",
+                  "Moderately stressful",
+                  "A little stressful",
+                  "Not stressful")
+
+falo_class_stress_tidy$Assessment <- factor(falo_class_stress_tidy$Assessment, levels = c("Pre-Test", "Post-Test"))
+
+falo_class_stress_plot <- ggplot(falo_class_stress_tidy, aes(`Question`, `Response`)) +
+  geom_line(aes(group = `Question`), color = "gray40") +
+  geom_point(aes(color = `Assessment`)) +
+  coord_flip() +
+  scale_x_discrete(limits = class_2) +
+  scale_y_discrete(limits = class_2_resp) +
   theme(panel.grid.major.y = element_blank(),
         panel.grid.minor.x = element_blank(),
         panel.grid.major.x = element_line(color = "gray80")) +
   theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
         plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
-        axis.text = element_text(size = 10),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10),
         axis.title=element_text(size=10),
         strip.text = element_text(size = 10),
-        plot.caption = element_text(size = 10)) +
+        plot.caption = element_text(size = 10),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom") +
   labs(x = "",
-       y = "T-score",
-       title = "BRIEF Scores",
-       subtitle = "Working Memory, Plan/Organize, and Task Monitoring Scales",
-       caption = "T-scores Above 65 are Clinically Significant") 
+       y = "",
+    title = "CLASS Responses",
+       subtitle = "Questions 15-20")
 
-falo_parent_plot
+falo_class_stress_plot
 
-class_falo <- falo %>% 
-  select(client, class_total_pre, class_total_post) %>% 
-  rename("Pre Score" = class_total_pre,
-         "Post Score" = class_total_post) %>% 
-   pivot_longer(
-    cols = c(2:3),
-    names_to = "measure",
-    values_to = "score"
-  )
+head(falo_pcss)
+falo_pcss_table <- falo_pcss %>% 
+  reactable(
+    columns = list(
+      `Pre Test` = colDef(name = "Pre-Test"),
+      `Post Test` = colDef(name = "Post-Test")),
+    pagination = FALSE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE,
+    searchable = TRUE,
+    height = 600,
+    width = 500)
 
-pcss_falo <- falo %>% 
-  select(1, c(6:13)) %>% 
-  rename("Feeling Slow Pre" = pcss_pre_feeling_slow,
-         "Feeling Slow Post" = pcss_post_feeling_slow,
-         "Feeling Foggy Pre" = pcss_pre_feeling_foggy,
-         "Feeling Foggy Post" = pcss_post_feeling_foggy,
-         "Difficulty Concentrating Pre" = pcss_pre_difficulty_concentrating,
-         "Difficulty Concentrating Post" = pcss_post_difficulty_concentrating, 
-         "Difficulty Remembering Pre" = pcss_pre_difficulty_remembering,
-         "Difficulty Remembering Post" = pcss_post_difficulty_remembering) %>% 
-  pivot_longer(
-    cols = c(2:9),
-    names_to = "measure",
-    values_to = "score"
-  )
-
-hit_falo <- falo %>% 
+hit_falo <- falo_hit %>% 
   select(client, hit_pre, hit_post) %>% 
   rename("Pre Score" = hit_pre,
          "Post Score" = hit_post) %>% 
@@ -764,75 +780,8 @@ hit_falo <- falo %>%
 
 ```{r falo plots, include=FALSE}
 
-p8 <- ggplot(class_falo, aes(measure, score)) +
-  geom_col(fill = "blue", 
-           alpha = 0.7) +
-  scale_x_discrete(limits = class_positions) +
-  scale_y_continuous(limits = c(0, 60),
-                     breaks = c(10, 20, 30, 40, 50, 60)) +
-  geom_text(aes(measure, score, label = score),
-            nudge_y = -3,
-            color = "white") +
-  theme(panel.grid.major.y = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.grid.major.x = element_line(color = "gray80")) +
-  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
-        axis.text = element_text(size = 10),
-        axis.title=element_text(size=10),
-        strip.text = element_text(size = 10)) +
-  labs(x = "",
-       y = "Score",
-       title = "CLASS Scores") 
- p8
 
-
-p9 <- ggplot(pcss_falo, aes(measure, score)) +
-  geom_col(fill = "blue", 
-           alpha = 0.7) +
-  scale_x_discrete(limits = pcss_positions) +
-  scale_y_continuous(limits = c(0, 6),
-                     breaks = c(0, 1, 2, 3, 4, 5, 6)) + 
-  geom_text(aes(measure, score, label = score),
-            nudge_y = -1,
-            color = "white") +
-  coord_flip() +
-  theme(panel.grid.major.y = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.grid.major.x = element_line(color = "gray80")) +
-  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
-        axis.text = element_text(size = 10),
-        axis.title=element_text(size=10),
-        strip.text = element_text(size = 10),
-        plot.caption = element_text(size = 10)) +
-  labs(x = "",
-       y = "Score",
-       title = "PCSS Results",
-       subtitle = "Cognitive Symptoms",
-       caption = "0 = No Symptoms\n 3 = Moderate Symptoms\n 6 = Severe Symptoms") 
-
-p9
-
-falo_pcss_table <- pcss_falo %>% 
-  select(-client) %>% 
-  gt() %>% 
-  cols_label(measure = "PCSS Question",
-             score = "Response") %>% 
-  cols_align(align = "left", columns = vars(measure)) %>% 
-  cols_align(align = "center", columns = vars(score)) %>% 
-  tab_header(title = "PCSS Results",
-             subtitle = "Cognitive Symptoms")
-
-falo_pcss_table
-
-falo_reactable <- pcss_falo %>% 
-  select(-client) %>% 
-  rename("PCSS Question" = measure,
-         "Response" = score) %>% 
-  reactable()
-
-falo_reactable
-
-
+hit_positions <- c("Pre Score", "Post Score")
 
 p10 <- ggplot(hit_falo, aes(measure, score)) +
   geom_hline(yintercept = 50, 
@@ -862,23 +811,122 @@ p10 <- ggplot(hit_falo, aes(measure, score)) +
 p10
 ```
 
-### BRIEF Self Report
+```{r falo brief update, include=FALSE}
+head(falo_brief_parent)
+head(falo_brief_self)
 
-```{r falo brief, include=TRUE, fig.width=6}
-falo_sr_plot
+falo_brief_self_tidy <- falo_brief_self %>% 
+  pivot_longer(
+    cols = c(`Pre-Test`, `Post-Test`),
+    names_to = "Assessment",
+    values_to = "Response"
+  )
+
+head(falo_brief_self_tidy)
+
+brief_scales <- c("Global Executive Composite",
+                  "Cognitive Regulation Index",
+                  "Organization Scale",
+                  "Task Completion Scale",
+                  "Plan/Organize Scale",
+                  "Working Memory Scale",
+                  "Initiate Scale",
+                  "Emotional Regulation Index",
+                  "Emotional Control Scale",
+                  "Shift Scale",
+                  "Behavior Regulation Index",
+                  "Self-Monitor Scale",
+                  "Inhibit Scale")
+
+falo_brief_self_tidy$Assessment <- factor(falo_brief_self_tidy$Assessment, levels = c("Pre-Test", "Post-Test"))
+
+falo_brief_self_plot <- ggplot(falo_brief_self_tidy, aes(`Scale/Index`, `Response`)) +
+  geom_line(aes(group = `Scale/Index`), color = "gray40") +
+  geom_point(aes(color = `Assessment`)) +
+  coord_flip() +
+  scale_x_discrete(limits = brief_scales) +
+  scale_y_continuous(limits = c(30, 90),
+                     breaks = c(30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90)) +
+  geom_text_repel(aes(label = `Response`)) +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom") +
+  labs(x = "",
+       y = "",
+    title = "BRIEF-2 Self-Report",
+    subtitle = "Scores Greater than 65 are Considered Clinically Significant")
+
+falo_brief_self_plot
+
+
+falo_brief_parent_tidy <- falo_brief_parent %>% 
+  pivot_longer(
+    cols = c(`Pre-Test`, `Post-Test`),
+    names_to = "Assessment",
+    values_to = "Response"
+  )
+
+falo_brief_parent_tidy$Assessment <- factor(falo_brief_parent_tidy$Assessment, levels = c("Pre-Test", "Post-Test"))
+
+falo_brief_parent_plot <- ggplot(falo_brief_parent_tidy, aes(`Scale/Index`, `Response`)) +
+  geom_line(aes(group = `Scale/Index`), color = "gray40") +
+  geom_point(aes(color = `Assessment`)) +
+  coord_flip() +
+  scale_x_discrete(limits = brief_scales) +
+  scale_y_continuous(limits = c(30, 90),
+                     breaks = c(30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90)) +
+  geom_text_repel(aes(label = `Response`)) +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom") +
+  labs(x = "",
+       y = "",
+    title = "BRIEF-2 Parent-Report",
+    subtitle = "Scores Greater than 65 are Considered Clinically Significant")
+
+falo_brief_parent_plot
 ```
 
-### BRIEF Parent Report
-
-```{r falo brief parent, include=TRUE, fig.width=6}
-falo_parent_plot
+### BRIEF Client Responses
+```{r falo brief, include=TRUE, fig.width=8}
+falo_brief_self_plot
 ```
 
-### CLASS
-
-```{r falo class, include=TRUE, fig.width=6}
-p8
+### BRIEF Parent Responses
+```{r falo brief parent, include=TRUE, fig.width=8}
+falo_brief_parent_plot
 ```
+
+### CLASS 1
+```{r falo class 1, include=TRUE, fig.width=8}
+falo_class_worse_plot
+```
+
+### CLASS 2
+```{r falo class 2, include=TRUE, fig.width=8}
+falo_class_stress_plot
+```
+
 
 ### PCSS
 
@@ -1161,65 +1209,133 @@ Column {.tabset data-width=650}
 ```{r drkat measures data organization, include=FALSE}
 head(outcome)
 
-
-drkat_brief_2 <- brief_data %>% 
-  filter(client == "DRKAT") %>% 
-  select(client, 22, 23) %>% 
-  rename("Working Memory Pre" = working_memory_pre_self,
-         "Working Memory Post" = working_memory_post_self) %>% 
-  pivot_longer(
-    cols = c(2:3),
-    names_to = "measure",
-    values_to = "score"
-  )
-
-drkat <- outcome %>% 
+drkat_hit <- outcome %>% 
   filter(client == "DRKAT")
 
-brief_drkat <- drkat %>% 
-  select(1, 16, 17, 20, 21, 32, 33) %>% 
-  rename("Pre Global" = brief_global_pre_self,
-         "Post Global" = brief_global_post_self,
-         "Pre BRI" = brief_bri_pre_self,
-         "Post BRI" = brief_bri_post_self,
-         "Pre MI" = brief_mi_pre_self,
-         "Post MI" = brief_mi_post_self) %>% 
+head(drkat_class_worse)
+head(drkat_class_stress)
+
+drkat_class_worse_tidy <- drkat_class_worse %>% 
   pivot_longer(
-    cols = c(2:7),
-    names_to = "measure",
-    values_to = "score"
+    cols = c(`Pre-Test`, `Post-Test`),
+    names_to = "Assessment",
+    values_to = "Response"
   )
 
-drkat_brief_graph <- c("Working Memory Pre", "Working Memory Post")
+class_1 <- c("Easily bothered by lights/screens or noise",
+             "Tiring easily during homework",
+             "Tiring easily during the school day",
+             "Headaches interfering with homework",
+             "Headaches interfering with classwork",
+             "Easily distracted during homework",
+             "Easily distracted during classwork",
+             "Trouble reading",
+             "Trouble remembering what was studied",
+             "Difficulty studying for tests or quizzes",
+             "Homework taking longer",
+             "In class, work taking longer",
+             "Difficulty understanding new material",
+             "Difficulty taking notes")
 
-class_drkat <- drkat %>% 
-  select(client, class_total_pre, class_total_post) %>% 
-  rename("Pre Score" = class_total_pre,
-         "Post Score" = class_total_post) %>% 
-   pivot_longer(
-    cols = c(2:3),
-    names_to = "measure",
-    values_to = "score"
-  )
+class_1_resp <- c("A lot worse",
+                  "Somewhat worse",
+                  "A little worse",
+                  "Not worse")
 
+drkat_class_worse_tidy$Assessment <- factor(drkat_class_worse_tidy$Assessment, levels = c("Pre-Test", "Post-Test"))
 
-pcss_drkat <- drkat %>% 
-  select(1, c(6:13)) %>% 
-  rename("Feeling Slow Pre" = pcss_pre_feeling_slow,
-         "Feeling Slow Post" = pcss_post_feeling_slow,
-         "Feeling Foggy Pre" = pcss_pre_feeling_foggy,
-         "Feeling Foggy Post" = pcss_post_feeling_foggy,
-         "Difficulty Concentrating Pre" = pcss_pre_difficulty_concentrating,
-         "Difficulty Concentrating Post" = pcss_post_difficulty_concentrating, 
-         "Difficulty Remembering Pre" = pcss_pre_difficulty_remembering,
-         "Difficulty Remembering Post" = pcss_post_difficulty_remembering) %>% 
+drkat_class_worse_plot <- ggplot(drkat_class_worse_tidy, aes(`Question`, `Response`)) +
+  geom_line(aes(group = `Question`), color = "gray40") +
+  geom_point(aes(color = `Assessment`)) +
+  coord_flip() +
+  scale_x_discrete(limits = class_1) +
+  scale_y_discrete(limits = class_1_resp) +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom") +
+  labs(x = "",
+       y = "",
+    title = "CLASS Responses",
+       subtitle = "Questions 1-14")
+
+drkat_class_worse_plot
+
+head(drkat_class_stress)
+
+drkat_class_stress_tidy <- drkat_class_stress %>% 
   pivot_longer(
-    cols = c(2:9),
-    names_to = "measure",
-    values_to = "score"
+    cols = c(`Pre-Test`, `Post-Test`),
+    names_to = "Assessment",
+    values_to = "Response"
   )
 
-hit_drkat <- drkat %>% 
+class_2 <- c("Stressed out about your grades dropping",
+             "More stressed out/overwhelmed with the schoolwork piling up",
+             "Not having enough support at home from parents/siblings",
+             "Not having enough support from teachers",
+             "Not being allowed to play sports/recreation",
+             "Missing time with friends and/or social activities")
+
+class_2_resp <- c("Very stressful",
+                  "Moderately stressful",
+                  "A little stressful",
+                  "Not stressful")
+
+drkat_class_stress_tidy$Assessment <- factor(drkat_class_stress_tidy$Assessment, levels = c("Pre-Test", "Post-Test"))
+
+drkat_class_stress_plot <- ggplot(drkat_class_stress_tidy, aes(`Question`, `Response`)) +
+  geom_line(aes(group = `Question`), color = "gray40") +
+  geom_point(aes(color = `Assessment`)) +
+  coord_flip() +
+  scale_x_discrete(limits = class_2) +
+  scale_y_discrete(limits = class_2_resp) +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10, angle = 90),
+        axis.text.y = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom") +
+  labs(x = "",
+       y = "",
+    title = "CLASS Responses",
+       subtitle = "Questions 15-20")
+
+drkat_class_stress_plot
+
+head(drkat_pcss)
+drkat_pcss_table <- falo_pcss %>% 
+  reactable(
+    columns = list(
+      `Pre Test` = colDef(name = "Pre-Test"),
+      `Post Test` = colDef(name = "Post-Test")),
+    pagination = FALSE,
+    striped = TRUE,
+    outlined = TRUE,
+    compact = TRUE,
+    highlight = TRUE,
+    bordered = TRUE,
+    searchable = TRUE,
+    height = 600,
+    width = 500)
+
+hit_drkat <- drkat_hit %>% 
   select(client, hit_pre, hit_post) %>% 
   rename("Pre Score" = hit_pre,
          "Post Score" = hit_post) %>% 
@@ -1231,84 +1347,6 @@ hit_drkat <- drkat %>%
 ```
 
 ```{r drkat plots, include=FALSE}
-
-drkat_brief_plot <- ggplot(drkat_brief_2, aes(measure, score)) +
-  geom_hline(yintercept = 65, 
-             linetype = "dashed",
-             size = 1) +
-  geom_col(fill = "blue", 
-           alpha = 0.7) +
-  scale_x_discrete(limits = drkat_brief_graph) +
-  scale_y_continuous(limits = c(0, 100),
-                     breaks = c(10, 20, 30, 40, 50, 60, 70, 80, 90, 100)) +
-  geom_text(aes(measure, score, label = score),
-            nudge_y = -3,
-            color = "white") +
-  theme(panel.grid.major.y = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.grid.major.x = element_line(color = "gray80")) +
-  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
-        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
-        axis.text = element_text(size = 10),
-        axis.title=element_text(size=10),
-        strip.text = element_text(size = 10),
-        plot.caption = element_text(size = 10)) +
-  labs(x = "",
-       y = "T-score",
-       title = "BRIEF Scores",
-       subtitle = "Working Memory Scale",
-       caption = "T-scores Above 65 are Clinically Significant") 
-
-drkat_brief_plot
-
-drkat_class_plot <- ggplot(class_drkat, aes(measure, score)) +
-  geom_col(fill = "blue", 
-           alpha = 0.7) +
-  scale_x_discrete(limits = class_positions) +
-  scale_y_continuous(limits = c(0, 60),
-                     breaks = c(10, 20, 30, 40, 50, 60)) +
-  geom_text(aes(measure, score, label = score),
-            nudge_y = -3,
-            color = "white") +
-  theme(panel.grid.major.y = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.grid.major.x = element_line(color = "gray80")) +
-  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
-        axis.text = element_text(size = 10),
-        axis.title=element_text(size=10),
-        strip.text = element_text(size = 10)) +
-  labs(x = "",
-       y = "Score",
-       title = "CLASS Scores") 
-
-drkat_class_plot
-
-
-drkat_pcss_plot <- ggplot(pcss_drkat, aes(measure, score)) +
-  geom_col(fill = "blue", 
-           alpha = 0.7) +
-  scale_x_discrete(limits = pcss_positions) +
-  scale_y_continuous(limits = c(0, 6),
-                     breaks = c(0, 1, 2, 3, 4, 5, 6)) + 
-  geom_text(aes(measure, score, label = score),
-            nudge_y = -1,
-            color = "white") +
-  coord_flip() +
-  theme(panel.grid.major.y = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.grid.major.x = element_line(color = "gray80")) +
-  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
-        axis.text = element_text(size = 10),
-        axis.title=element_text(size=10),
-        strip.text = element_text(size = 10),
-        plot.caption = element_text(size = 10)) +
-  labs(x = "",
-       y = "Score",
-       title = "PCSS Results",
-       subtitle = "Cognitive Symptoms",
-       caption = "0 = No Symptoms\n 3 = Moderate Symptoms\n 6 = Severe Symptoms") 
-
-drkat_pcss_plot
 
 drkat_hit_plot <- ggplot(hit_drkat, aes(measure, score)) +
   geom_hline(yintercept = 50, 
@@ -1338,22 +1376,86 @@ drkat_hit_plot <- ggplot(hit_drkat, aes(measure, score)) +
 drkat_hit_plot
 ```
 
+```{r drkat brief update, include=FALSE}
+head(drkat_brief_self)
+
+drkat_brief_self_tidy <- drkat_brief_self %>% 
+  pivot_longer(
+    cols = c(`Pre-Test`, `Post-Test`),
+    names_to = "Assessment",
+    values_to = "Response"
+  )
+
+head(drkat_brief_self_tidy)
+
+brief_scales <- c("Global Executive Composite",
+                  "Cognitive Regulation Index",
+                  "Organization Scale",
+                  "Task Completion Scale",
+                  "Plan/Organize Scale",
+                  "Working Memory Scale",
+                  "Initiate Scale",
+                  "Emotional Regulation Index",
+                  "Emotional Control Scale",
+                  "Shift Scale",
+                  "Behavior Regulation Index",
+                  "Self-Monitor Scale",
+                  "Inhibit Scale")
+
+drkat_brief_self_tidy$Assessment <- factor(drkat_brief_self_tidy$Assessment, levels = c("Pre-Test", "Post-Test"))
+
+drkat_brief_self_plot <- ggplot(drkat_brief_self_tidy, aes(`Scale/Index`, `Response`)) +
+  geom_line(aes(group = `Scale/Index`), color = "gray40") +
+  geom_point(aes(color = `Assessment`)) +
+  coord_flip() +
+  scale_x_discrete(limits = brief_scales) +
+  scale_y_continuous(limits = c(30, 90),
+                     breaks = c(30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90)) +
+  geom_text_repel(aes(label = `Response`)) +
+  theme(panel.grid.major.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.major.x = element_line(color = "gray80")) +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        plot.subtitle = element_text(color = "black", size = 10, face = "bold"),
+        axis.text.x = element_text(size = 10),
+        axis.text.y = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10),
+        plot.caption = element_text(size = 10),
+        legend.title = element_text(size = 12),
+        legend.text = element_text(size = 10),
+        legend.position = "bottom") +
+  labs(x = "",
+       y = "",
+    title = "BRIEF-A Self-Report",
+    subtitle = "Scores Greater than 65 are Considered Clinically Significant")
+
+drkat_brief_self_plot
+
+```
+
 ### BRIEF 
-```{r drkat brief, include=TRUE, fig.width=6}
-drkat_brief_plot
+```{r drkat brief, include=TRUE, fig.width=8}
+drkat_brief_self_plot
 ```
 
-### CLASS
-
-```{r drkat class, include=TRUE, fig.width=6}
-drkat_class_plot
+### CLASS 1
+```{r drkat class 1, include=TRUE, fig.width=8}
+drkat_class_worse_plot
 ```
+
+### CLASS 2
+```{r drkat class 2, include=TRUE, fig.width=8}
+drkat_class_stress_plot
+```
+
 
 ### PCSS
 
 ```{r drkat pcss, include=TRUE}
-drkat_pcss_plot
+falo_pcss_table
 ```
+
 
 ### HIT
 
