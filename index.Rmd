@@ -58,6 +58,9 @@ prge_class_stress <- import(here("data", "prge_class_stress.xlsx"),
 prge_pcss <- import(here("data", "pcss_prge.xlsx"),
                setclass = "tbl_df")
 
+prge_education <- import(here("data", "prge_education.xlsx"),
+               setclass = "tbl_df")
+
 falo_brief_self <- import(here("data", "falo_brief_self.xlsx"),
                       setclass = "tbl_df")
 
@@ -499,13 +502,6 @@ prge_pcss_table
 ```
 
 
-### HIT
-
-```{r prge hit, include=TRUE}
-p3a
-```
-
-
 Column {data-width=350}
 -----------------------------------------------------------------------
 
@@ -585,9 +581,9 @@ p5 <- ggplot(effort_data, aes(session, effort)) +
         axis.title=element_text(size=10),
         strip.text = element_text(size = 10)) +
   labs(x = "Session",
-       y = "Perceived Effort During Reading",
-       title = "Perceived Effort While Reading",
-       caption = "1 = No Effort\n 2 = A little Effort\n 3 = Somewhat Effortful\n 4 = Quite Effortful\n 5 = Extremely Effortful") 
+       y = "Perceived Level of Motivation",
+       title = "Perceived Motivation While Reading",
+       caption = "1 = No Motivation\n 2 = A little Motivation\n 3 = Somewhat Motivated\n 4 = Quite Motivated\n 5 = Extremely Motivated") 
 
 p5
 
@@ -612,6 +608,41 @@ p6 <- ggplot(helpfulness, aes(session, help)) +
        caption = "1 = Not Helpful at All\n 2 = Not Helpful\n 3 = Somewhat Helpful\n 4 = Helpful\n 5 = Very Helpful") 
 
 p6
+
+head(prge_education)
+
+pg_ed <- prge_education %>% 
+  pivot_longer(
+    cols = c(2:4),
+    names_to = "education",
+    values_to = "score"
+  )
+
+head(pg_ed)
+
+p7 <- ggplot(pg_ed, aes(session, score)) +
+  geom_point(aes(shape = education), size = 2) +
+  geom_line() +
+  scale_shape_manual(name = "Psychoeducation Topic",
+                     labels = c("Assignment completion",
+                              "Strategy use following concussion",
+                              "Types of thinking"),
+                     values = c(17, 16, 15)) +
+  scale_x_continuous(limits = c(0, 10),
+                     breaks = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)) +
+  scale_y_continuous(limits = c(0, 5),
+                     breaks = c(1, 2, 3, 4, 5)) +
+  theme_classic() +
+  theme(plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+        axis.text = element_text(size = 10),
+        axis.title=element_text(size=10),
+        strip.text = element_text(size = 10)) +
+  labs(x = "Session",
+       y = "Level of Understanding",
+       title = "Client Understanding of Delivered Psychoeducation",
+       caption = "5 = Client demonstrated understanding with independent teach back\n 4 = Client demonstrated understanding with minimum verbal prompting\n 3 = Client demonstrated understanding with moderate verbal prompting\n 2 = Client demonstrated understanding with maximum verbal prompting\n 1 = Client stated they did not understand nature of psychoeducation") 
+
+p7
 ```
 
 
@@ -619,7 +650,7 @@ p6
 p4
 ```
 
-### Perceived Effort
+### Perceived Motivation 
 
 ```{r effort, include=TRUE, fig.align="left"}
 p5
@@ -631,6 +662,11 @@ p5
 p6
 ```
 
+### Client Receipt of Psychoeducation 
+
+```{r prge psychoeducation, include=TRUE, fig.align="left", fig.width=10}
+p7
+```
 
 # FALO Outcome
 
@@ -1439,12 +1475,16 @@ drkat_brief_self_plot
 drkat_brief_self_plot
 ```
 
-### CLASS 1
+### CLASS 1 
+
+#### CLASS post-treatment scores not included as the client was not actively enrolled in school for the majority of the duration of treatment. 
 ```{r drkat class 1, include=TRUE, fig.width=8}
 drkat_class_worse_plot
 ```
 
-### CLASS 2
+### CLASS 2 
+
+#### CLASS post-treatment scores not included as the client was not actively enrolled in school for the majority of the duration of treatment. 
 ```{r drkat class 2, include=TRUE, fig.width=8}
 drkat_class_stress_plot
 ```
