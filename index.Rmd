@@ -639,7 +639,7 @@ p7 <- ggplot(pg_ed, aes(session, score)) +
         strip.text = element_text(size = 10)) +
   labs(x = "Session",
        y = "Level of Understanding",
-       title = "Client Understanding of Delivered Psychoeducation",
+       title = "Client Understanding of\n Delivered Psychoeducation",
        caption = "5 = Client demonstrated understanding with independent teach back\n 4 = Client demonstrated understanding with minimum verbal prompting\n 3 = Client demonstrated understanding with moderate verbal prompting\n 2 = Client demonstrated understanding with maximum verbal prompting\n 1 = Client stated they did not understand nature of psychoeducation") 
 
 p7
